@@ -1,14 +1,19 @@
+import java.util.List;
+import java.util.ArrayList;
+
 public class Territory {
     private String name;
     private String continent;
     private Player owner;
     private int armyCount;
+    private List<Territory> neighbours;
 
     public Territory(String name, String continent){
         this.name = name;
         this.continent = continent;
         this.owner = null;
         this.armyCount = 0;
+        this.neighbours = new ArrayList<>();
     }
     public String getName(){
         return name;

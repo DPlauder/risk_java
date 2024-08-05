@@ -1,9 +1,9 @@
 
 public class Main {
     public static void main(String[] args) {
-        Game game = new Game();
-        UI ui = new UI(game);
-        ui.show();
+        Map map = new Map();
+        Game game = new Game(map);
+        UI ui = new UI(game, map);
         game.start();
     }
 }

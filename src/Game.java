@@ -2,12 +2,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
-    final private Map map;
+    private Map map;
     private List<Player> players;
 
-    public Game(){
+    public Game(Map map){
         players = new ArrayList<>();
-        map = new Map();
+        this.map = map;
         initPlayers();
     }
 
@@ -30,10 +30,10 @@ public class Game {
         }
     }
 
-    public int calculateReinforcments(Player player){
+    public int calculateReinforcements(Player player) {
         int baseReinforcements = 3;
-        int reinforcements = (int)Math.floor(player.getTerritories().size() / 3);
-        if(player.getCards().size() >= 3){
+        int reinforcements = (int) Math.floor(player.getTerritories().size() / 3);
+        if (player.getCards().size() >= 3) {
             reinforcements += 5;
             player.deleteThreeCards();
         }

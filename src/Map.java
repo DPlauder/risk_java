@@ -3,35 +3,43 @@ import java.util.List;
 
 public class Map {
     private List<List<Territory>> territories;
+    private List<Continent> continents;
 
     public Map(){
         this.territories = new ArrayList<>();
+        this.continents = new ArrayList<>();
+        String[] usedContinents = {"Red", "Yellow", "Blue", "Green"};
+        initContinents(usedContinents);
         initTerritories();
     }
+    public void initContinents(String[] usedContinents){
+        for (String usedContinent : usedContinents) {
+            continents.add(new Continent(usedContinent));
+        }
+    }
     public void initTerritories(){
-        String continent = null;
-        for(int i = 1; i <= 4; i++){
+        for (Continent continent : continents) {
             List<Territory> tempList = new ArrayList<>();
-            for(int j = 1; j <= 6; j++){
-                if(i == 1){
-                    continent = "Red";
-                }
-                if(i == 2){
-                    continent = "Yellow";
-                }
-                if(i == 3){
-                    continent = "Blue";
-                }
-                if(i == 4){
-                    continent = "Green";
-                }
-                Territory territory = new Territory(continent + " territory " + j  , continent);
+            for (int j = 1; j <= 6; j++) {
+                Territory territory = new Territory(continent.getName() + " territory " + j, continent.getName());
                 tempList.add(territory);
             }
             territories.add(tempList);
+            continent.addTerritories(tempList);
         }
     }
     public List<List<Territory>> getTerritories(){
         return territories;
+    }
+
+    public Territory getTerritory(String territoryName) {
+        for (List<Territory> continentTerritories : territories) {
+            for (Territory territory : continentTerritories) {
+                if (territory.getName().equals(territoryName)) {
+                    return territory;
+                }
+            }
+        }
+        return null;
     }
 }
