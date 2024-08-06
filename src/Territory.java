@@ -33,4 +33,10 @@ public class Territory {
     public void setArmyCount(int armyCount){
         this.armyCount = armyCount;
     }
+    public void setNeighbours(List<Territory> neighbours){
+        this.neighbours = neighbours;
+    }
+    public List<Territory> getNeighbours(){
+        return neighbours;
+    }
 }

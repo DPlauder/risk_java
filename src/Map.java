@@ -8,12 +8,13 @@ public class Map {
     public Map(){
         this.territories = new ArrayList<>();
         this.continents = new ArrayList<>();
-        String[] usedContinents = {"Red", "Yellow", "Blue", "Green"};
-        initContinents(usedContinents);
+        initContinents();
         initTerritories();
+        MapTypes.initializeMap();
+        setUpNeighbors();
     }
-    public void initContinents(String[] usedContinents){
-        for (String usedContinent : usedContinents) {
+    public void initContinents(){
+        for (String usedContinent : Config.CONTINENTS) {
             continents.add(new Continent(usedContinent));
         }
     }
@@ -26,6 +27,21 @@ public class Map {
             }
             territories.add(tempList);
             continent.addTerritories(tempList);
+        }
+    }
+    public void setUpNeighbors(){
+        for (List<Territory> continentTerritories : territories) {
+            for (Territory territory : continentTerritories) {
+                List<String> neighborNames = MapTypes.getNeighbors(territory.getName());
+                List<Territory> neighbors = new ArrayList<>();
+                for (String neighborName : neighborNames) {
+                    Territory neighbor = getTerritory(neighborName);
+                    if (neighbor != null) {
+                        neighbors.add(neighbor);
+                    }
+                }
+                territory.setNeighbours(neighbors);
+            }
         }
     }
     public List<List<Territory>> getTerritories(){

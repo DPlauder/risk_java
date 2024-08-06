@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
@@ -84,12 +86,33 @@ public class UI extends JFrame {
 
     private void connectButtonToTerritory(JButton button, String territoryName) {
         Territory territory = map.getTerritory(territoryName);
-
         if (territory != null) {
-            button.setText(territory.getName() + " - " + territory.getArmyCount());
+            button.setText(String.valueOf(territory.getArmyCount()) + " " + territory.getName());
+            button.setName(territory.getName());
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(game.getGamephase() == 1){
+                        game.reinforcementPhase(territory);
+                        button.setText(String.valueOf(territory.getArmyCount()));
+                    }
+                    if(game.getGamephase() == 2){
+                        game.setAttackTerritory(territory);
+                        if(territory.getOwner() == game.getCurrentPlayer()) {
+                            game.setAttackTerritory(territory);
+                        }
+                        else{
+                            game.setDefendTerritory(territory);
+                        }
+                    }
+
+                }
+            });
+
         } else {
             button.setEnabled(false);
             button.setToolTipText("Territory not found: " + territoryName);
         }
     }
+
 }

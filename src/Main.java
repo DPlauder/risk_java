@@ -4,6 +4,6 @@ public class Main {
         Map map = new Map();
         Game game = new Game(map);
         UI ui = new UI(game, map);
-        game.start();
+        game.start(ui);
     }
 }
