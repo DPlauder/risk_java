@@ -21,7 +21,7 @@ public class MapTypes {
         addNeighbors("Red territory 3", List.of("Red territory 2", "Red territory 5", "Blue territory 1"));
         addNeighbors("Red territory 4", List.of("Red territory 1", "Red territory 2", "Red territory 6"));
         addNeighbors("Red territory 5", List.of("Red territory 2", "Red territory 3", "Red territory 6"));
-        addNeighbors("Red territory 6", List.of("Red territory 4", "Red territory 2", "Red territory 6", "Yellow territory 1", "Yellow territory 1"));
+        addNeighbors("Red territory 6", List.of("Red territory 4", "Red territory 2", "Red territory 6", "Yellow territory 1", "Yellow territory 2"));
 
         // Define neighbors for Blue territories
         addNeighbors("Blue territory 1", List.of("Blue territory 2", "Blue territory 3", "Blue territory 3", "Red territory 3"));

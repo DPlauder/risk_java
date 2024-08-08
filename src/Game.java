@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 public class Game {
     private Map map;
@@ -15,13 +16,10 @@ public class Game {
         players = new ArrayList<>();
         this.map = map;
         initPlayers();
-        for(Player player : players){
-            System.out.println(player.getName());
-        }
+        distributeTerritories();
         currentPlayerIndex = 0;
 
     }
-
     private void initPlayers(){
         Player player = null;
         for(int i = 0; i < Config.PLAYER.length; i++){
@@ -33,11 +31,22 @@ public class Game {
             players.add(player);
         }
     }
+    private void distributeTerritories(){
+        List<Territory> allTerritories = map.getTerritories();
+        Collections.shuffle(allTerritories);
+
+        int playerIndex = 0;
+        for (Territory territory : allTerritories) {
+            Player player = players.get(playerIndex);
+            territory.setOwner(player);
+            player.getTerritories().add(territory);
+            playerIndex = (playerIndex + 1) % players.size();
+        }
+    }
 
     public void start(UI ui){
         this.ui = ui;
         gamephase = 1;
-
     }
     public Player getCurrentPlayer(){
         return players.get(currentPlayerIndex);
@@ -78,23 +87,28 @@ public class Game {
         int newArmy = territory.getArmyCount() + reinforcements;
         territory.setArmyCount(newArmy);
     }
-    public void setFightTerritories(Territory territory){
-        if(territory.getOwner() == getCurrentPlayer()){
-            attackTerritory = territory;
-        }
-    }
+
     public void setAttackTerritory(Territory territory){
         attackTerritory = territory;
         for(Territory neighbor : territory.getNeighbours()) {
             System.out.println("Neighbor: " + neighbor.getName());
         }
+        checkReadyToAttack();
     }
     public void setDefendTerritory(Territory territory){
         defendTerritory = territory;
+        checkReadyToAttack();
     }
-    public void attackPhase(Territory attackTerritory, Territory defendTerritory){
+    public void checkReadyToAttack(){
+        //ui.openAttackDialog(attackTerritory, defendTerritory);
+        if(defendTerritory != null && attackTerritory != null){
+            ui.openAttackDialog(attackTerritory, defendTerritory);
+            //fight();
+        }
+    }
+    public void fight(){
         int attackArmy = attackTerritory.getArmyCount();
-        Player attacker = attackTerritory.getOwner();
+        Player attacker = getCurrentPlayer();
         int defendArmy = defendTerritory.getArmyCount();
         Player defender = defendTerritory.getOwner();
     }

@@ -87,7 +87,7 @@ public class UI extends JFrame {
     private void connectButtonToTerritory(JButton button, String territoryName) {
         Territory territory = map.getTerritory(territoryName);
         if (territory != null) {
-            button.setText(String.valueOf(territory.getArmyCount()) + " " + territory.getName());
+            button.setText(String.valueOf(territory.getArmyCount()) + " " + territory.getOwner().getName());
             button.setName(territory.getName());
             button.addActionListener(new ActionListener() {
                 @Override
@@ -105,14 +105,17 @@ public class UI extends JFrame {
                             game.setDefendTerritory(territory);
                         }
                     }
-
                 }
             });
-
         } else {
             button.setEnabled(false);
             button.setToolTipText("Territory not found: " + territoryName);
         }
     }
-
+    public void openAttackDialog(Territory attackTerritory, Territory defendTerritory){
+        AttackDialog attackDialog = new AttackDialog(attackTerritory,defendTerritory);
+        attackDialog.setModal(true);
+        attackDialog.pack();
+        attackDialog.setLocationRelativeTo(null);
+    }
 }
