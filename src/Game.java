@@ -11,6 +11,8 @@ public class Game {
 
     private Territory attackTerritory;
     private Territory defendTerritory;
+    private int attackArmy;
+    private int defendArmy;
 
     public Game(Map map){
         players = new ArrayList<>();
@@ -24,9 +26,9 @@ public class Game {
         Player player = null;
         for(int i = 0; i < Config.PLAYER.length; i++){
             if(Config.PLAYER[i] != null && !Config.PLAYER[i].isEmpty())
-                player = new Player(Config.PLAYER[i]);
+                player = new Player(Config.PLAYER[i], Config.PLAYERCOLORS[i]);
             else{
-                player = new Player("Player " + (i + 1));
+                player = new Player("Player " + (i + 1), Config.PLAYERCOLORS[i]);
             }
             players.add(player);
         }
@@ -39,6 +41,7 @@ public class Game {
         for (Territory territory : allTerritories) {
             Player player = players.get(playerIndex);
             territory.setOwner(player);
+            territory.setArmyCount(3);
             player.getTerritories().add(territory);
             playerIndex = (playerIndex + 1) % players.size();
         }
@@ -57,6 +60,18 @@ public class Game {
 
     public int getGamephase(){
         return gamephase;
+    }
+    public Territory getAttackTerritory(){
+        return attackTerritory;
+    }
+    public Territory getDefendTerritory(){
+        return defendTerritory;
+    }
+    public int getAttackArmy(){
+        return attackArmy;
+    }
+    public int getDefendArmy(){
+        return  defendArmy;
     }
 
     public void moveArmy(Territory territoryStart, Territory territoryEnd, int armySize){
@@ -77,6 +92,7 @@ public class Game {
     public int calculateReinforcements(Player player) {
         int baseReinforcements = 3;
         int reinforcements = (int) Math.floor(player.getTerritories().size() / 3);
+
         if (player.getCards().size() >= 3) {
             reinforcements += 5;
             player.deleteThreeCards();
@@ -95,21 +111,94 @@ public class Game {
         }
         checkReadyToAttack();
     }
+    public void resetAttackTerritory(){
+        attackTerritory = null;
+    }
+
+    public void isAttackTerritoryNeighbour(Territory chosenDefendTerritory){
+        for(Territory neighbour : attackTerritory.getNeighbours()){
+            if(neighbour == chosenDefendTerritory){
+                setDefendTerritory(chosenDefendTerritory);
+            }
+        }
+    }
+
     public void setDefendTerritory(Territory territory){
         defendTerritory = territory;
         checkReadyToAttack();
     }
+    public void resetDefendTerritory(){
+        defendTerritory = null;
+    }
     public void checkReadyToAttack(){
-        //ui.openAttackDialog(attackTerritory, defendTerritory);
-        if(defendTerritory != null && attackTerritory != null){
-            ui.openAttackDialog(attackTerritory, defendTerritory);
-            //fight();
+        if(defendTerritory != null && attackTerritory != null && attackTerritory.getArmyCount() > 1){
+            ui.openAttackDialog(this);
         }
     }
-    public void fight(){
-        int attackArmy = attackTerritory.getArmyCount();
+    public void fight(int attackArmyCount){
+        int startAttackArmy = attackArmyCount;
+        attackArmy = attackArmyCount;
         Player attacker = getCurrentPlayer();
-        int defendArmy = defendTerritory.getArmyCount();
+        defendArmy = defendTerritory.getArmyCount();
         Player defender = defendTerritory.getOwner();
+
+        int attackDice = Math.min(attackArmy, 3);
+        int defendDice = Math.min(defendArmy, 2);
+
+        List<Integer> attackRolls = new ArrayList<>();
+        List<Integer> defendRolls = new ArrayList<>();
+
+        for (int i = 0; i < attackDice; i++) {
+            attackRolls.add(Dice.rollDice());
+        }
+        for (int i = 0; i < defendDice; i++) {
+            defendRolls.add(Dice.rollDice());
+        }
+        Collections.sort(attackRolls, Collections.reverseOrder());
+        Collections.sort(defendRolls, Collections.reverseOrder());
+
+
+
+        int battles = Math.min(attackRolls.size(), defendRolls.size());
+        int attackLosses = 0;
+        int defendLosses = 0;
+
+        for (int i = 0; i < battles; i++) {
+            if (attackRolls.get(i) > defendRolls.get(i)) {
+                defendLosses++;
+            } else {
+                attackLosses++;
+            }
+        }
+        attackArmy -= attackLosses;
+        defendArmy -= defendLosses;
+
+
+        if(defendArmy == 0){
+            System.out.println("defender lost");
+            defendTerritory.setOwner(attacker);
+            defendTerritory.setArmyCount(attackArmy);
+            attackTerritory.setArmyCount(attackTerritory.getArmyCount() - startAttackArmy);
+            attacker.addTerritory(defendTerritory);
+            defender.deleteTerritory(defendTerritory);
+            endAttackPhase();
+        }
+        else if(attackArmy == 0){
+            System.out.println("attacker lost");
+            attackTerritory.setArmyCount(attackTerritory.getArmyCount() - startAttackArmy);
+            defendTerritory.setArmyCount(defendArmy);
+            endAttackPhase();
+        }
+        else {
+            attackTerritory.setArmyCount(attackTerritory.getArmyCount() - startAttackArmy + attackArmy);
+            defendTerritory.setArmyCount(defendArmy);
+        }
+    }
+    private void endAttackPhase(){
+        resetAttackTerritory();
+        resetDefendTerritory();
+        attackArmy = 0;
+        defendArmy = 0;
+        ui.updateUI();
     }
 }

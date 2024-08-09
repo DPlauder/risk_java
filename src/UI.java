@@ -1,8 +1,10 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.Color;
+import java.util.List;
+import java.util.ArrayList;
+
 
 public class UI extends JFrame {
     //private JFrame frame;
@@ -11,6 +13,8 @@ public class UI extends JFrame {
     private JPanel yellowContinent;
     private JPanel blueContinent;
     private JPanel greenContinent;
+
+    private List<JButton> territoryButtons;
 
     private JButton redOne;
     private JButton redTwo;
@@ -52,7 +56,41 @@ public class UI extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(800,600);
         this.setVisible(true);
+        setLocationRelativeTo(null);
+
+        initializeButtonsList();
         connectButtonsToTerritories();
+    }
+    private void initializeButtonsList() {
+        territoryButtons = new ArrayList<>();
+
+        territoryButtons.add(redOne);
+        territoryButtons.add(redTwo);
+        territoryButtons.add(redThree);
+        territoryButtons.add(redFour);
+        territoryButtons.add(redFive);
+        territoryButtons.add(redSix);
+
+        territoryButtons.add(yellowOne);
+        territoryButtons.add(yellowTwo);
+        territoryButtons.add(yellowThree);
+        territoryButtons.add(yellowFour);
+        territoryButtons.add(yellowFive);
+        territoryButtons.add(yellowSix);
+
+        territoryButtons.add(blueOne);
+        territoryButtons.add(blueTwo);
+        territoryButtons.add(blueThree);
+        territoryButtons.add(blueFour);
+        territoryButtons.add(blueFive);
+        territoryButtons.add(blueSix);
+
+        territoryButtons.add(greenOne);
+        territoryButtons.add(greenTwo);
+        territoryButtons.add(greenThree);
+        territoryButtons.add(greenFour);
+        territoryButtons.add(greenFive);
+        territoryButtons.add(greenSix);
     }
     private void connectButtonsToTerritories() {
         connectButtonToTerritory(redOne, "Red territory 1");
@@ -83,26 +121,27 @@ public class UI extends JFrame {
         connectButtonToTerritory(greenFive, "Green territory 5");
         connectButtonToTerritory(greenSix, "Green territory 6");
     }
-
     private void connectButtonToTerritory(JButton button, String territoryName) {
         Territory territory = map.getTerritory(territoryName);
-        if (territory != null) {
-            button.setText(String.valueOf(territory.getArmyCount()) + " " + territory.getOwner().getName());
+        if(territory != null) {
+            button.setText(String.valueOf(territory.getArmyCount()));
             button.setName(territory.getName());
+            Color territoryColor = Utils.stringToColor(territory.getOwner().getColor());
+            button.setForeground(territoryColor);
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if(game.getGamephase() == 1){
+                    if(game.getGamephase() == 1 && territory.getOwner() == game.getCurrentPlayer()){
                         game.reinforcementPhase(territory);
                         button.setText(String.valueOf(territory.getArmyCount()));
                     }
                     if(game.getGamephase() == 2){
-                        game.setAttackTerritory(territory);
                         if(territory.getOwner() == game.getCurrentPlayer()) {
+                            game.resetDefendTerritory();
                             game.setAttackTerritory(territory);
                         }
                         else{
-                            game.setDefendTerritory(territory);
+                            game.isAttackTerritoryNeighbour(territory);
                         }
                     }
                 }
@@ -111,11 +150,22 @@ public class UI extends JFrame {
             button.setEnabled(false);
             button.setToolTipText("Territory not found: " + territoryName);
         }
+
     }
-    public void openAttackDialog(Territory attackTerritory, Territory defendTerritory){
-        AttackDialog attackDialog = new AttackDialog(attackTerritory,defendTerritory);
-        attackDialog.setModal(true);
-        attackDialog.pack();
-        attackDialog.setLocationRelativeTo(null);
+    public void openAttackDialog(Game game){
+        AttackDialog attackDialog = new AttackDialog(game);
+        attackDialog.setVisible(true);
     }
+    public void updateUI() {
+        for (JButton button : territoryButtons) {
+            String territoryName = button.getName();
+            Territory territory = map.getTerritory(territoryName);
+            if (territory != null) {
+                button.setText(String.valueOf(territory.getArmyCount()));
+                Color territoryColor = Utils.stringToColor(territory.getOwner().getColor());
+                button.setForeground(territoryColor);
+            }
+        }
+    }
+
 }
