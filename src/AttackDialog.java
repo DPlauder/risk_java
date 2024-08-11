@@ -88,7 +88,12 @@ public class AttackDialog extends JDialog {
         cancelBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose();
+                if(isConfirmed){
+                    game.endAttackPhase();
+                }
+                else{
+                    dispose();
+                }
             }
         });
 

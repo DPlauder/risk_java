@@ -3,4 +3,5 @@ public class Config {
     public static final String[] CONTINENTS = {"Red", "Yellow", "Blue", "Green"};
     public static final String[] PLAYER = {"Max", ""};
     public static final String[] PLAYERCOLORS = {"red", "blue", "green", "yellow", "black"};
+    public static final String[] GAMEPHASES = {"Start", "Reinforcement", "Attack", "Move"};
 }

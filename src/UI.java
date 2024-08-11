@@ -43,10 +43,13 @@ public class UI extends JFrame {
     private JButton greenFour;
     private JButton greenFive;
     private JButton greenSix;
+    private JButton nextPhaseBtn;
+
 
 
     private Game game;
     private Map map;
+    private AttackDialog attackDialog;
 
     public UI(Game game, Map map){
         this.setTitle("Risiko");
@@ -60,6 +63,20 @@ public class UI extends JFrame {
 
         initializeButtonsList();
         connectButtonsToTerritories();
+        nextPhaseBtn.setVisible(false);
+
+        nextPhaseBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(game.getGamephase() == 3){
+                    game.setMovePhase();
+                }
+                else if(game.getGamephase() == 4){
+
+                };
+
+            }
+        });
     }
     private void initializeButtonsList() {
         territoryButtons = new ArrayList<>();
@@ -144,6 +161,13 @@ public class UI extends JFrame {
                             game.isAttackTerritoryNeighbour(territory);
                         }
                     }
+                    if(game.getGamephase() == 4 && territory.getOwner() == game.getCurrentPlayer()){
+                        if(game.getMoveFromTerritory() == null){
+                            System.out.println("hello move");
+                        } else if (game.getMoveFromTerritory() != null) {
+                            
+                        }
+                    }
                 }
             });
         } else {
@@ -153,7 +177,7 @@ public class UI extends JFrame {
 
     }
     public void openAttackDialog(Game game){
-        AttackDialog attackDialog = new AttackDialog(game);
+        attackDialog = new AttackDialog(game);
         attackDialog.setVisible(true);
     }
     public void updateUI() {
@@ -167,5 +191,15 @@ public class UI extends JFrame {
             }
         }
     }
-
+    public void closeAttackDialog() {
+        if (attackDialog != null) {
+            attackDialog.dispose();  // Close the dialog
+            attackDialog = null;     // Clear the reference
+        }
+    }
+    public void showNextPhaseBtn(){
+        System.out.println("hello move BTN");
+        nextPhaseBtn.setVisible(true);
+        game.setMovePhase();
+    }
 }

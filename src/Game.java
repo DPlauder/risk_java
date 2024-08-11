@@ -14,6 +14,9 @@ public class Game {
     private int attackArmy;
     private int defendArmy;
 
+    private Territory moveFromTerritory;
+    private Territory moveToTerritory;
+
     public Game(Map map){
         players = new ArrayList<>();
         this.map = map;
@@ -73,20 +76,19 @@ public class Game {
     public int getDefendArmy(){
         return  defendArmy;
     }
-
-    public void moveArmy(Territory territoryStart, Territory territoryEnd, int armySize){
-        int armyStart = territoryStart.getArmyCount() - armySize;
-        int armyEnd = territoryEnd.getArmyCount() + armySize;
-        territoryStart.setArmyCount(armyStart);
-        territoryEnd.setArmyCount(armyEnd);
+    public Territory getMoveToTerritory(){
+        return moveToTerritory;
+    }
+    public  Territory getMoveFromTerritory(){
+        return  moveToTerritory;
     }
 
-    public void movePhase(){
 
-    }
+
     public void reinforcementPhase(Territory territory){
         int reinforcements = calculateReinforcements(getCurrentPlayer());
         placeArmy(territory, reinforcements);
+        ui.showNextPhaseBtn();
         gamephase = 2;
     }
     public int calculateReinforcements(Player player) {
@@ -113,6 +115,7 @@ public class Game {
     }
     public void resetAttackTerritory(){
         attackTerritory = null;
+        attackArmy = 0;
     }
 
     public void isAttackTerritoryNeighbour(Territory chosenDefendTerritory){
@@ -129,6 +132,7 @@ public class Game {
     }
     public void resetDefendTerritory(){
         defendTerritory = null;
+        defendArmy = 0;
     }
     public void checkReadyToAttack(){
         if(defendTerritory != null && attackTerritory != null && attackTerritory.getArmyCount() > 1){
@@ -194,11 +198,31 @@ public class Game {
             defendTerritory.setArmyCount(defendArmy);
         }
     }
-    private void endAttackPhase(){
+    public void endAttackPhase(){
         resetAttackTerritory();
         resetDefendTerritory();
-        attackArmy = 0;
-        defendArmy = 0;
         ui.updateUI();
+        ui.closeAttackDialog();
+    }
+    public void setMovePhase(){
+        gamephase = 4;
+    }
+    public void setMoveFromTerritory(Territory territory){
+        moveFromTerritory = territory;
+    }
+    public void resetMoveFromTerritory(){
+        moveFromTerritory = null;
+    }
+    public void resetMoveToTerritory(){
+        moveToTerritory = null;
+    }
+    public void setMoveToTerritory(Territory territory){
+        moveToTerritory = territory;
+    }
+
+    public void moveArmy(int armyMoved){
+        moveFromTerritory.setArmyCount(moveFromTerritory.getArmyCount() - armyMoved);
+        moveToTerritory.setArmyCount(moveToTerritory.getArmyCount() + armyMoved );
+
     }
 }
