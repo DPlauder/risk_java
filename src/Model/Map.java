@@ -1,5 +1,10 @@
+package Model;
+
+import Config.*;
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class Map {
     private List<Territory> territories;
@@ -13,6 +18,7 @@ public class Map {
         MapTypes.initializeMap();
         setUpNeighbors();
     }
+
 
     public void initContinents(){
         for (String usedContinent : Config.CONTINENTS) {
@@ -46,10 +52,19 @@ public class Map {
         }
     }
 
+    /**
+     * description
+     * @return
+     */
     public List<Territory> getTerritories(){
         return territories;
     }
 
+    /**
+     *
+     * @param territoryName
+     * @return
+     */
     public Territory getTerritory(String territoryName) {
         for (Territory territory : territories) {
             if (territory.getName().equals(territoryName)) {

@@ -1,3 +1,9 @@
+package View;
+
+import Control.Game;
+import Model.*;
+import Utils.Utils;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,6 +56,7 @@ public class UI extends JFrame {
     private Game game;
     private Map map;
     private AttackDialog attackDialog;
+    private MoveDialog moveDialog;
 
     public UI(Game game, Map map){
         this.setTitle("Risiko");
@@ -68,13 +75,12 @@ public class UI extends JFrame {
         nextPhaseBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(game.getGamephase() == 3){
+                if(game.getGamephase() == 2){
                     game.setMovePhase();
                 }
-                else if(game.getGamephase() == 4){
-
-                };
-
+                if(game.getGamephase() == 4){
+                    game.nextTurn();
+                }
             }
         });
     }
@@ -163,16 +169,17 @@ public class UI extends JFrame {
                     }
                     if(game.getGamephase() == 4 && territory.getOwner() == game.getCurrentPlayer()){
                         if(game.getMoveFromTerritory() == null){
-                            System.out.println("hello move");
-                        } else if (game.getMoveFromTerritory() != null) {
-                            
+                            game.setMoveFromTerritory(territory);
+                            System.out.println(game.getMoveFromTerritory());
+                        } else if (game.getMoveFromTerritory() != null && territory.getOwner() == game.getCurrentPlayer()) {
+                            game.isMoveTerritoryNeighbour(territory);
                         }
                     }
                 }
             });
         } else {
             button.setEnabled(false);
-            button.setToolTipText("Territory not found: " + territoryName);
+            button.setToolTipText("Model.Territory not found: " + territoryName);
         }
 
     }
@@ -193,13 +200,20 @@ public class UI extends JFrame {
     }
     public void closeAttackDialog() {
         if (attackDialog != null) {
-            attackDialog.dispose();  // Close the dialog
-            attackDialog = null;     // Clear the reference
+            attackDialog.dispose();
         }
     }
     public void showNextPhaseBtn(){
-        System.out.println("hello move BTN");
         nextPhaseBtn.setVisible(true);
         game.setMovePhase();
+    }
+    public void openMoveDialog(){
+        moveDialog = new MoveDialog(game);
+        moveDialog.setVisible(true);
+    }
+    public void closeMoveDialog(){
+        if(moveDialog != null){
+            moveDialog.dispose();
+        }
     }
 }

@@ -1,6 +1,13 @@
+package Control;
+
+import View.UI;
+import Model.*;
+import Config.Config;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+
 
 public class Game {
     private Map map;
@@ -25,13 +32,14 @@ public class Game {
         currentPlayerIndex = 0;
 
     }
+
     private void initPlayers(){
         Player player = null;
         for(int i = 0; i < Config.PLAYER.length; i++){
             if(Config.PLAYER[i] != null && !Config.PLAYER[i].isEmpty())
                 player = new Player(Config.PLAYER[i], Config.PLAYERCOLORS[i]);
             else{
-                player = new Player("Player " + (i + 1), Config.PLAYERCOLORS[i]);
+                player = new Player("Model.Player " + (i + 1), Config.PLAYERCOLORS[i]);
             }
             players.add(player);
         }
@@ -59,6 +67,7 @@ public class Game {
     }
     public void nextTurn(){
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        gamephase = 1;
     }
 
     public int getGamephase(){
@@ -79,8 +88,8 @@ public class Game {
     public Territory getMoveToTerritory(){
         return moveToTerritory;
     }
-    public  Territory getMoveFromTerritory(){
-        return  moveToTerritory;
+    public Territory getMoveFromTerritory(){
+        return moveFromTerritory;
     }
 
 
@@ -194,6 +203,7 @@ public class Game {
             endAttackPhase();
         }
         else {
+            //extra movemehtode
             attackTerritory.setArmyCount(attackTerritory.getArmyCount() - startAttackArmy + attackArmy);
             defendTerritory.setArmyCount(defendArmy);
         }
@@ -209,6 +219,7 @@ public class Game {
     }
     public void setMoveFromTerritory(Territory territory){
         moveFromTerritory = territory;
+        System.out.println(getMoveFromTerritory());
     }
     public void resetMoveFromTerritory(){
         moveFromTerritory = null;
@@ -219,10 +230,23 @@ public class Game {
     public void setMoveToTerritory(Territory territory){
         moveToTerritory = territory;
     }
+    public void isMoveTerritoryNeighbour(Territory chosenMoveToTerritory){
+        System.out.println("in is moveneighbor");
+        for(Territory neighbour : moveFromTerritory.getNeighbours()){
+            if(neighbour == chosenMoveToTerritory){
+                System.out.println("in if is moveneighbor");
+                setMoveToTerritory(chosenMoveToTerritory);
+                ui.openMoveDialog();
+            }
+        }
+    }
+    public void moveArmy(int startTerritoryArmy, int endTerritoryArmy){
+        moveFromTerritory.setArmyCount(startTerritoryArmy);
+        moveToTerritory.setArmyCount(endTerritoryArmy);
+        resetMoveFromTerritory();
+        resetMoveToTerritory();
+        ui.updateUI();
 
-    public void moveArmy(int armyMoved){
-        moveFromTerritory.setArmyCount(moveFromTerritory.getArmyCount() - armyMoved);
-        moveToTerritory.setArmyCount(moveToTerritory.getArmyCount() + armyMoved );
-
+        nextTurn();
     }
 }
