@@ -83,6 +83,8 @@ public class MoveDialog extends JDialog {
         cancelBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                game.resetMoveFromTerritory();
+                game.resetMoveToTerritory();
                 dispose();
             }
         });

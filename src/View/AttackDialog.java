@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 
 public class AttackDialog extends JDialog {
     private Game game;
+    private UI ui;
     private Territory attackTerritory;
     private Territory defendTerritory;
     private int attackArmy;
@@ -27,10 +28,12 @@ public class AttackDialog extends JDialog {
 
     private boolean isConfirmed;
 
-    public AttackDialog(Game game){
+    public AttackDialog(Game game, UI ui){
 
-        setContentPane(contentPane);
-        setModal(true);
+        this.setContentPane(contentPane);
+        this.setModal(true);
+
+        this.setTitle("Attack Phase");
 
         this.game = game;
         this.attackTerritory = game.getAttackTerritory();
@@ -97,12 +100,13 @@ public class AttackDialog extends JDialog {
                     game.endAttackPhase();
                 }
                 else{
+                    ui.resetHighlights();
                     dispose();
                 }
             }
         });
 
-        pack();
-        setLocationRelativeTo(null);
+        this.pack();
+        this.setLocationRelativeTo(null);
     }
 }

@@ -3,7 +3,6 @@ package Control;
 import View.UI;
 import Model.*;
 import Config.Config;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -20,6 +19,7 @@ public class Game {
     private Territory defendTerritory;
     private int attackArmy;
     private int defendArmy;
+    private boolean attackSuccess;
 
     private Territory moveFromTerritory;
     private Territory moveToTerritory;
@@ -30,7 +30,6 @@ public class Game {
         initPlayers();
         distributeTerritories();
         currentPlayerIndex = 0;
-
     }
 
     private void initPlayers(){
@@ -39,7 +38,7 @@ public class Game {
             if(Config.PLAYER[i] != null && !Config.PLAYER[i].isEmpty())
                 player = new Player(Config.PLAYER[i], Config.PLAYERCOLORS[i]);
             else{
-                player = new Player("Model.Player " + (i + 1), Config.PLAYERCOLORS[i]);
+                player = new Player("Player " + (i + 1), Config.PLAYERCOLORS[i]);
             }
             players.add(player);
         }
@@ -61,6 +60,7 @@ public class Game {
     public void start(UI ui){
         this.ui = ui;
         gamephase = 1;
+        ui.updateUI();
     }
     public Player getCurrentPlayer(){
         return players.get(currentPlayerIndex);
@@ -68,6 +68,8 @@ public class Game {
     public void nextTurn(){
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         gamephase = 1;
+        attackSuccess = false;
+        ui.updateUI();
     }
 
     public int getGamephase(){
@@ -76,20 +78,28 @@ public class Game {
     public Territory getAttackTerritory(){
         return attackTerritory;
     }
-    public Territory getDefendTerritory(){
+    public Territory getDefendTerritory() {
         return defendTerritory;
     }
-    public int getAttackArmy(){
+
+    public int getAttackArmy() {
         return attackArmy;
     }
-    public int getDefendArmy(){
-        return  defendArmy;
+
+    public int getDefendArmy() {
+        return defendArmy;
     }
-    public Territory getMoveToTerritory(){
+
+    public Territory getMoveToTerritory() {
         return moveToTerritory;
     }
-    public Territory getMoveFromTerritory(){
+
+    public Territory getMoveFromTerritory() {
         return moveFromTerritory;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
     }
 
 
@@ -99,6 +109,7 @@ public class Game {
         placeArmy(territory, reinforcements);
         ui.showNextPhaseBtn();
         gamephase = 2;
+        ui.updateUI();
     }
     public int calculateReinforcements(Player player) {
         int baseReinforcements = 3;
@@ -133,6 +144,19 @@ public class Game {
                 setDefendTerritory(chosenDefendTerritory);
             }
         }
+    }
+    public List<Territory> getAttackableNeighbours(Territory territory) {
+        if (territory == null) {
+            return Collections.emptyList();
+        }
+
+        List<Territory> attackableNeighbours = new ArrayList<>();
+        for (Territory neighbour : territory.getNeighbours()) {
+            if (neighbour.getOwner() != getCurrentPlayer()) {
+                attackableNeighbours.add(neighbour);
+            }
+        }
+        return attackableNeighbours;
     }
 
     public void setDefendTerritory(Territory territory){
@@ -194,6 +218,7 @@ public class Game {
             attackTerritory.setArmyCount(attackTerritory.getArmyCount() - startAttackArmy);
             attacker.addTerritory(defendTerritory);
             defender.deleteTerritory(defendTerritory);
+            attackSuccess = true;
             endAttackPhase();
         }
         else if(attackArmy == 0){
@@ -211,11 +236,17 @@ public class Game {
     public void endAttackPhase(){
         resetAttackTerritory();
         resetDefendTerritory();
+        if(attackSuccess){
+            getCurrentPlayer().addCard();
+            attackSuccess = false;
+        }
         ui.updateUI();
         ui.closeAttackDialog();
+
     }
     public void setMovePhase(){
         gamephase = 4;
+        ui.updateUI();
     }
     public void setMoveFromTerritory(Territory territory){
         moveFromTerritory = territory;
@@ -231,10 +262,8 @@ public class Game {
         moveToTerritory = territory;
     }
     public void isMoveTerritoryNeighbour(Territory chosenMoveToTerritory){
-        System.out.println("in is moveneighbor");
         for(Territory neighbour : moveFromTerritory.getNeighbours()){
             if(neighbour == chosenMoveToTerritory){
-                System.out.println("in if is moveneighbor");
                 setMoveToTerritory(chosenMoveToTerritory);
                 ui.openMoveDialog();
             }

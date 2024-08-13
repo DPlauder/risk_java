@@ -5,16 +5,26 @@ import Model.*;
 import Utils.Utils;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.ArrayList;
 
 
 public class UI extends JFrame {
-    //private JFrame frame;
+
     private JPanel contentPane;
+
+    private JPanel playerOnePane;
+    private JPanel playerTwoPane;
+    private JPanel playerThreePane;
+    private JPanel playerFourPane;
+    private JPanel playerFivePane;
+    private JPanel playerSixPane;
+
     private JPanel redContinent;
     private JPanel yellowContinent;
     private JPanel blueContinent;
@@ -51,6 +61,8 @@ public class UI extends JFrame {
     private JButton greenSix;
     private JButton nextPhaseBtn;
 
+    private JLabel gamePhaseLbl;
+
 
 
     private Game game;
@@ -64,26 +76,87 @@ public class UI extends JFrame {
         this.map = map;
         this.setContentPane(contentPane);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(800,600);
         this.setVisible(true);
-        setLocationRelativeTo(null);
+
+        this.gamePhaseLbl.setText(String.valueOf( game.getGamephase())); ;
+
 
         initializeButtonsList();
         connectButtonsToTerritories();
         nextPhaseBtn.setVisible(false);
 
+        initiatePlayersZone();
+
         nextPhaseBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(game.getGamephase() == 2){
+                    game.endAttackPhase();
                     game.setMovePhase();
+
                 }
-                if(game.getGamephase() == 4){
+                else if(game.getGamephase() == 4){
                     game.nextTurn();
                 }
             }
         });
+
+        this.pack();
+        setLocationRelativeTo(null);
     }
+
+    private void initiatePlayersZone() {
+        List<JPanel> playerPanelsList = new ArrayList<>();
+        playerPanelsList.add(playerOnePane);
+        playerPanelsList.add(playerTwoPane);
+        playerPanelsList.add(playerThreePane);
+        playerPanelsList.add(playerFourPane);
+        playerPanelsList.add(playerFivePane);
+        playerPanelsList.add(playerSixPane);
+
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            Player player = game.getPlayers().get(i);
+            JPanel tempPanel = playerPanelsList.get(i);
+
+            tempPanel.setLayout(new GridLayout(1, 1));
+
+            JLabel playerNameLbl = new JLabel();
+            playerNameLbl.setText(player.getName());
+
+            Color playerColor = Utils.stringToColor(player.getColor());
+            tempPanel.setBorder(BorderFactory.createLineBorder(playerColor, 3));
+            tempPanel.add(playerNameLbl);
+
+            JWindow infoWindow = new JWindow();
+            infoWindow.setLayout(new BorderLayout());
+
+            // Label to display the number of cards
+            JLabel playerInfoLbl = new JLabel();
+            infoWindow.add(playerInfoLbl, BorderLayout.CENTER);
+            infoWindow.pack();
+
+            // Add mouse listener to show/hide the info window
+            tempPanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    // Update the label text with the current number of cards
+                    playerInfoLbl.setText("Cards: " + player.getCards().size());
+
+                    // Reposition and show the info window
+                    Point locationOnScreen = tempPanel.getLocationOnScreen();
+                    infoWindow.setLocation(locationOnScreen.x + tempPanel.getWidth(), locationOnScreen.y);
+                    infoWindow.pack(); // Repack the window to adjust the size if needed
+                    infoWindow.setVisible(true);
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    infoWindow.setVisible(false);
+                }
+            });
+        }
+    }
+
     private void initializeButtonsList() {
         territoryButtons = new ArrayList<>();
 
@@ -151,6 +224,8 @@ public class UI extends JFrame {
             button.setName(territory.getName());
             Color territoryColor = Utils.stringToColor(territory.getOwner().getColor());
             button.setForeground(territoryColor);
+
+
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -158,33 +233,62 @@ public class UI extends JFrame {
                         game.reinforcementPhase(territory);
                         button.setText(String.valueOf(territory.getArmyCount()));
                     }
-                    if(game.getGamephase() == 2){
-                        if(territory.getOwner() == game.getCurrentPlayer()) {
+                    else if(game.getGamephase() == 2){
+                        if (territory == game.getAttackTerritory()) {
+                            game.resetAttackTerritory();
+                            resetHighlights();
+                        } else if (territory.getOwner() == game.getCurrentPlayer()) {
                             game.resetDefendTerritory();
                             game.setAttackTerritory(territory);
-                        }
-                        else{
+                            highlightAttackableTerritories(territory);
+                        } else {
                             game.isAttackTerritoryNeighbour(territory);
                         }
+                        updateButtonVisuals();
                     }
-                    if(game.getGamephase() == 4 && territory.getOwner() == game.getCurrentPlayer()){
-                        if(game.getMoveFromTerritory() == null){
+                    else if(game.getGamephase() == 4 && territory.getOwner() == game.getCurrentPlayer()){
+                        if(territory == game.getMoveFromTerritory()){
+                            game.resetMoveFromTerritory();
+                            resetHighlights();
+                        }
+                        else if(game.getMoveFromTerritory() == null){
                             game.setMoveFromTerritory(territory);
-                            System.out.println(game.getMoveFromTerritory());
-                        } else if (game.getMoveFromTerritory() != null && territory.getOwner() == game.getCurrentPlayer()) {
+                            updateButtonVisuals();
+                        }
+                        else if (game.getMoveFromTerritory() != null && territory.getOwner() == game.getCurrentPlayer()) {
                             game.isMoveTerritoryNeighbour(territory);
                         }
+                        updateButtonVisuals();
                     }
+                }
+
+            });
+            button.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    super.mouseEntered(e);
+                    if (game.getGamephase() == 2 && territory.getOwner() == game.getCurrentPlayer()) {
+                        highlightAttackableTerritories(territory);
+                    } else if (game.getGamephase() == 4 && territory.getOwner() == game.getCurrentPlayer()) {
+                        highlightMoveableTerritories(territory);
+                    }
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    super.mouseExited(e);
+                    resetHighlights();
+
                 }
             });
         } else {
             button.setEnabled(false);
-            button.setToolTipText("Model.Territory not found: " + territoryName);
+            button.setToolTipText("Territory not found: " + territoryName);
         }
 
     }
     public void openAttackDialog(Game game){
-        attackDialog = new AttackDialog(game);
+        attackDialog = new AttackDialog(game, this);
         attackDialog.setVisible(true);
     }
     public void updateUI() {
@@ -196,24 +300,73 @@ public class UI extends JFrame {
                 Color territoryColor = Utils.stringToColor(territory.getOwner().getColor());
                 button.setForeground(territoryColor);
             }
+
         }
+        gamePhaseLbl.setText(String.valueOf(game.getGamephase()) + " " + game.getCurrentPlayer().getName());
+        if(game.getGamephase() == 1){
+            nextPhaseBtn.setVisible(false);
+        }
+        updateButtonVisuals();
+        resetHighlights();
     }
     public void closeAttackDialog() {
         if (attackDialog != null) {
+            resetHighlights();
             attackDialog.dispose();
         }
     }
     public void showNextPhaseBtn(){
         nextPhaseBtn.setVisible(true);
         game.setMovePhase();
+
     }
     public void openMoveDialog(){
         moveDialog = new MoveDialog(game);
         moveDialog.setVisible(true);
     }
-    public void closeMoveDialog(){
-        if(moveDialog != null){
-            moveDialog.dispose();
+    private void highlightAttackableTerritories(Territory chosenTerritory) {
+
+        for (JButton button : territoryButtons) {
+            button.setBackground(null);
+        }
+
+        List<Territory> attackableTerritories = game.getAttackableNeighbours(chosenTerritory);
+        for (Territory territory : attackableTerritories) {
+            for (JButton button : territoryButtons) {
+                if (button.getName().equals(territory.getName())) {
+                    button.setBackground(Color.RED);
+                }
+            }
         }
     }
+    public void resetHighlights() {
+        for (JButton button : territoryButtons) {
+            button.setBackground(null);
+        }
+    }
+
+    public void updateButtonVisuals() {
+        for (JButton button : territoryButtons) {
+            if (game.getAttackTerritory() != null && button.getName().equals(game.getAttackTerritory().getName())) {
+                button.setBorder(BorderFactory.createLineBorder(Color.GREEN, 3));
+            }else if(game.getMoveFromTerritory() != null && button.getName().equals(game.getMoveFromTerritory().getName())){
+                button.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
+            }
+            else {
+                button.setBorder(null);
+            }
+        }
+    }
+    private void highlightMoveableTerritories(Territory chosenTerritory) {
+        resetHighlights();
+        List<Territory> moveableTerritories = chosenTerritory.getNeighbours();
+        for (Territory territory : moveableTerritories) {
+            for (JButton button : territoryButtons) {
+                if (button.getName().equals(territory.getName()) && territory.getOwner() == game.getCurrentPlayer()) {
+                    button.setBackground(Color.CYAN);
+                }
+            }
+        }
+    }
+
 }

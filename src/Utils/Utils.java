@@ -10,6 +10,7 @@ public class Utils {
             case "black": return Color.BLACK;
             case "yellow": return Color.YELLOW;
             case "green": return Color.GREEN;
+            case "orange": return Color.ORANGE;
             default: return Color.GRAY;
         }
     }
