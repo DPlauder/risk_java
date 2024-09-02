@@ -10,7 +10,7 @@ import java.util.Collections;
 
 public class Game {
     private final Map map;
-    private final List<Player> players;
+    private List<Player> players;
     private UI ui;
     private int gamephase;
     private int currentPlayerIndex;
@@ -25,15 +25,20 @@ public class Game {
     private Territory moveToTerritory;
 
     public Game(Map map){
-        players = new ArrayList<>();
         this.map = map;
-        initPlayers();
-        distributeTerritories();
-        currentPlayerIndex = 0;
+
     }
     //TODO GAME INIT
+    public void newGame(){
+        initPlayers();
+        distributeTerritories();
+        ui.newGameUi();
+        currentPlayerIndex = 0;
+        start();
+    }
     private void initPlayers(){
         Player player = null;
+        players = new ArrayList<>();
         for(int i = 0; i < Config.PLAYER.length; i++){
             if(Config.PLAYER[i] != null && !Config.PLAYER[i].isEmpty())
                 player = new Player(Config.PLAYER[i], Config.PLAYERCOLORS[i]);
@@ -56,13 +61,15 @@ public class Game {
             playerIndex = (playerIndex + 1) % players.size();
         }
     }
-
-    public void start(UI ui){
+    public void setUi(UI ui){
         this.ui = ui;
+    }
+    public void start(){
         gamephase = 1;
         ui.updateUI();
     }
     //TODO GETTER SETTER
+
     public Player getCurrentPlayer(){
         return players.get(currentPlayerIndex);
     }
@@ -242,8 +249,9 @@ public class Game {
         else{
             resetAttackTerritory();
             resetDefendTerritory();
+            ui.updateUI();
         }
-        ui.updateUI();
+
         ui.closeAttackDialog();
 
 

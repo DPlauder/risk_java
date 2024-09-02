@@ -83,11 +83,14 @@ public class UI extends JFrame {
         connectButtonsToTerritories();
         nextPhaseBtn.setVisible(false);
 
-        initiatePlayersZone();
+
 
         nextPhaseBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (game.getGamephase() == 0) {
+                    game.newGame();
+                }
                 if(game.getGamephase() == 2){
                     game.endAttackPhase();
                     game.setMovePhase();
@@ -101,6 +104,10 @@ public class UI extends JFrame {
 
         this.pack();
         setLocationRelativeTo(null);
+    }
+    public void newGameUi(){
+        initiatePlayersZone();
+        updateUI();
     }
 
     private void initiatePlayersZone() {
@@ -220,8 +227,8 @@ public class UI extends JFrame {
         if(territory != null) {
             button.setText(String.valueOf(territory.getArmyCount()));
             button.setName(territory.getName());
-            Color territoryColor = Utils.stringToColor(territory.getOwner().getColor());
-            button.setForeground(territoryColor);
+            //Color territoryColor = Utils.stringToColor(territory.getOwner().getColor());
+            //button.setForeground(territoryColor);
 
 
             button.addActionListener(new ActionListener() {
@@ -300,6 +307,7 @@ public class UI extends JFrame {
             }
 
         }
+
         gamePhaseLbl.setText(String.valueOf(game.getGamephase()) + " " + game.getCurrentPlayer().getName());
         if(game.getGamephase() == 1){
             nextPhaseBtn.setVisible(false);
@@ -368,6 +376,8 @@ public class UI extends JFrame {
     }
     public void endGame(Player winner){
         gamePhaseLbl.setText(winner.getName() + " won");
+        nextPhaseBtn.setText("New Game");
+        updateButtonVisuals();
     }
 
 }
