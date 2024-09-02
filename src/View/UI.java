@@ -63,8 +63,6 @@ public class UI extends JFrame {
 
     private JLabel gamePhaseLbl;
 
-
-
     private Game game;
     private Map map;
     private AttackDialog attackDialog;
@@ -367,6 +365,9 @@ public class UI extends JFrame {
                 }
             }
         }
+    }
+    public void endGame(Player winner){
+        gamePhaseLbl.setText(winner.getName() + " won");
     }
 
 }

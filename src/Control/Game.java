@@ -9,8 +9,8 @@ import java.util.Collections;
 
 
 public class Game {
-    private Map map;
-    private List<Player> players;
+    private final Map map;
+    private final List<Player> players;
     private UI ui;
     private int gamephase;
     private int currentPlayerIndex;
@@ -31,7 +31,7 @@ public class Game {
         distributeTerritories();
         currentPlayerIndex = 0;
     }
-
+    //TODO GAME INIT
     private void initPlayers(){
         Player player = null;
         for(int i = 0; i < Config.PLAYER.length; i++){
@@ -62,6 +62,7 @@ public class Game {
         gamephase = 1;
         ui.updateUI();
     }
+    //TODO GETTER SETTER
     public Player getCurrentPlayer(){
         return players.get(currentPlayerIndex);
     }
@@ -101,9 +102,7 @@ public class Game {
     public List<Player> getPlayers() {
         return players;
     }
-
-
-
+    //TODO Reinforcementphase
     public void reinforcementPhase(Territory territory){
         int reinforcements = calculateReinforcements(getCurrentPlayer());
         placeArmy(territory, reinforcements);
@@ -126,6 +125,7 @@ public class Game {
         territory.setArmyCount(newArmy);
     }
 
+    //TODO AttackPhase
     public void setAttackTerritory(Territory territory){
         attackTerritory = territory;
         for(Territory neighbor : territory.getNeighbours()) {
@@ -133,6 +133,7 @@ public class Game {
         }
         checkReadyToAttack();
     }
+    //
     public void resetAttackTerritory(){
         attackTerritory = null;
         attackArmy = 0;
@@ -228,24 +229,36 @@ public class Game {
             endAttackPhase();
         }
         else {
-            //extra movemehtode
             attackTerritory.setArmyCount(attackTerritory.getArmyCount() - startAttackArmy + attackArmy);
             defendTerritory.setArmyCount(defendArmy);
         }
     }
     public void endAttackPhase(){
-        resetAttackTerritory();
-        resetDefendTerritory();
-        if(attackSuccess){
-            getCurrentPlayer().addCard();
-            attackSuccess = false;
+        if (isEnd()) {
+            System.out.println(getCurrentPlayer());
+            gamephase = 0;
+            ui.endGame(getCurrentPlayer());
+        }
+        else{
+            resetAttackTerritory();
+            resetDefendTerritory();
         }
         ui.updateUI();
         ui.closeAttackDialog();
 
+
     }
+    //TODO Movementphase
+    public void giveCard(){
+        if(attackSuccess){
+            getCurrentPlayer().addCard();
+            attackSuccess = false;
+        }
+    }
+
     public void setMovePhase(){
         gamephase = 4;
+        giveCard();
         ui.updateUI();
     }
     public void setMoveFromTerritory(Territory territory){
@@ -277,5 +290,9 @@ public class Game {
         ui.updateUI();
 
         nextTurn();
+    }
+    //TODO EndConditions
+    public boolean isEnd(){
+        return getCurrentPlayer().getTerritories().size() == map.getTerritories().size();
     }
 }
