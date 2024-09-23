@@ -111,6 +111,11 @@ public class Game {
     }
     //TODO Reinforcementphase
     public void reinforcementPhase(Territory territory){
+        //DEV
+        if(territory == null){
+
+        }
+        //DEV
         int reinforcements = calculateReinforcements(getCurrentPlayer());
         placeArmy(territory, reinforcements);
         ui.showNextPhaseBtn();
@@ -147,9 +152,11 @@ public class Game {
     }
 
     public void isAttackTerritoryNeighbour(Territory chosenDefendTerritory){
-        for(Territory neighbour : attackTerritory.getNeighbours()){
-            if(neighbour == chosenDefendTerritory){
-                setDefendTerritory(chosenDefendTerritory);
+        if(attackTerritory != null){
+            for(Territory neighbour : attackTerritory.getNeighbours()){
+                if(neighbour == chosenDefendTerritory){
+                    setDefendTerritory(chosenDefendTerritory);
+                }
             }
         }
     }
